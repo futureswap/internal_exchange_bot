@@ -16,12 +16,12 @@ const stableInstance = stableContract.connect(wallet);
 const assetInstance = assetContract.connect(wallet)
 
 const ALOT_OF_TOKENS = "100000000000000000000000000000000000000000000000000000000000";
- 
+const SMALL_AMOUNT = 10000000000000000000
 
 const checkAndApprove = async () => {
     const Stableallowance = await stableInstance.allowance(wallet.address, FUTURESWAP_ADDRESS);
     const assetAllowance = await assetInstance.allowance(wallet.address, FUTURESWAP_ADDRESS)
-    if (Stableallowance.toString() === '0') {
+    if (Stableallowance < SMALL_AMOUNT) {
         logger.log('info', "starting approve stable transaction")
         const tx = await stableInstance.approve(FUTURESWAP_ADDRESS, ethers.utils.bigNumberify(ALOT_OF_TOKENS), {
             gasPrice: GAS_PRICE_APPROVAL
@@ -29,7 +29,7 @@ const checkAndApprove = async () => {
         await provider.waitForTransaction(tx.hash)
         logger.log('info', tx)
     }
-    if (assetAllowance.toString() === '0') {
+    if (assetAllowance.toString() < SMALL_AMOUNT) {
         logger.log('info', "starting approve asset transaction")
         const tx = await assetInstance.approve(FUTURESWAP_ADDRESS, ethers.utils.bigNumberify(ALOT_OF_TOKENS), {
             gasPrice: GAS_PRICE_APPROVAL
