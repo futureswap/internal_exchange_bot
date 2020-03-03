@@ -37,7 +37,7 @@ const {getBalanceAsset, getBalanceStable} = require('./tokenServices')
 
   const tradeInStable = async (amountToPay) => {
       const balanceOfStable = await getBalanceStable()
-      const amount = balanceOfStable < amountToPay ? balanceOfStable : amountToPay
+      const amount = Number(balanceOfStable) < Number(amountToPay) ? balanceOfStable : amountToPay
       const tx = await futreSwapInstance.internalExchange(amount, false, {
           gasPrice: GAS_PRICE
       })
@@ -46,7 +46,7 @@ const {getBalanceAsset, getBalanceStable} = require('./tokenServices')
 
   const tradeInAsset = async (amountToPay) => {
       const balanceOfAsset = await getBalanceAsset()
-      const amount = balanceOfAsset < amountToPay ? balanceOfAsset : amountToPay
+      const amount = Number(balanceOfAsset) < Number(amountToPay) ? balanceOfAsset : amountToPay
       const tx = await futreSwapInstance.internalExchange(amount, true, {
         gasPrice: GAS_PRICE
       })
