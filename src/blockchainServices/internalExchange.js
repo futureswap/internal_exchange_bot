@@ -37,22 +37,20 @@ const {getBalanceAsset, getBalanceStable} = require('./tokenServices')
 
   const tradeInStable = async (amountToPay) => {
       const balanceOfStable = await getBalanceStable()
-      console.log("tradein stable")
       const amount = balanceOfStable < amountToPay ? balanceOfStable : amountToPay
       const tx = await futreSwapInstance.internalExchange(amount, false, {
           gasPrice: GAS_PRICE
       })
-      logger.log("info", tx)
+      logger.log("info", {message: "traded in stable", tx})
   }
 
   const tradeInAsset = async (amountToPay) => {
       const balanceOfAsset = await getBalanceAsset()
-      console.log("trade in asset")
       const amount = balanceOfAsset < amountToPay ? balanceOfAsset : amountToPay
       const tx = await futreSwapInstance.internalExchange(amount, true, {
         gasPrice: GAS_PRICE
       })
-      logger.log("info", tx)
+      logger.log("info", {message: "traded in asset", tx})
 
   }
 
@@ -62,13 +60,10 @@ const {getBalanceAsset, getBalanceStable} = require('./tokenServices')
     const traderRecieves = traderPays.add(traderProfit)
     const oneEther = ethers.utils.bigNumberify("1000000000000000000")
     const buyAssetRatio = traderRecieves.mul(oneEther).div(traderPays)
-    console.log({buyAssetRatio: buyAssetRatio.toString()})
     const amountToPay = imbalanceAmount.sub(imbalanceAmount.mul(buyAssetRatio).div(oneEther)).mul(15)
-    console.log({amountToPay: amountToPay.toString()})
     const imbalanceSide = isAssetImbalance ? false : true
     const recieveAmount = await futreSwapInstance.getImbalance(imbalanceSide, amountToPay)
     const profitAmount = recieveAmount.sub(amountToPay)
-    console.log({profitAmount: profitAmount.toString()})
     return {amountToPay, profitAmount}
 
   }
