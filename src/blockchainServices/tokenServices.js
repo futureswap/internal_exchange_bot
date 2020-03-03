@@ -37,10 +37,24 @@ const checkAndApprove = async () => {
         await provider.waitForTransaction(tx.hash)
         logger.log('info', tx)
     }
-
-
+    
 }
 
+const getBalanceStable = async () => {
+    const balanceStable = await stableInstance.balanceOf(wallet.address)
+    return balanceStable
+}
+    
+const getBalanceAsset = async () => {
+    const balanceAsset = await assetInstance.balanceOf(wallet.address)
+    return balanceAsset
+    
+}
+
+
+
 module.exports = {
-    checkAndApprove
+    checkAndApprove,
+    getBalanceStable, 
+    getBalanceAsset
 }

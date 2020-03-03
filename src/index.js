@@ -1,6 +1,6 @@
 require('dotenv').config()
 const {getImbalance} = require('./blockchainServices/internalExchange')
-const {checkAndApprove} = require('./blockchainServices/approval')
+const {checkAndApprove} = require('./blockchainServices/tokenServices')
 const {RERUNTIME} = require('./configurations')
 
 const main = async () => {

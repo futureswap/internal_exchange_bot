@@ -8,12 +8,14 @@ const {
 //   const { DAI_ADDRESS, CHAINLINK_ADDRESS} = require("../constants")
   const { FUTURESWAP_ABI } = require("../ABI")
   const {logger} = require('../logging')
+  const {getBalanceAsset, getBalanceStable} = require('./tokenServices')
 
   const provider = new ethers.getDefaultProvider(NETWORK);
 
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
   const futreSwap = new ethers.Contract(FUTURESWAP_ADDRESS, FUTURESWAP_ABI, provider)
   const futreSwapInstance = futreSwap.connect(wallet)
+
 
   const getImbalance = async () => {
     const [imbalanceAmount, isAssetImbalance] = await futreSwapInstance.calculateImbalance()
@@ -25,27 +27,30 @@ const {
     const {amountToPay, profitAmount} = await calculateImbalanceAmount(imbalanceAmount, isAssetImbalance, imbalanceMultiplier)
     if (profitAmount >= MIN_PROFIT) {
     if (isAssetImbalance) {
-        await tradeInAsset(amountToPay)
-    } else {
         await tradeInStable(amountToPay)
+    } else {
+        await tradeInAsset(amountToPay)
     }
     } else {
         logger.log("info", "Check Ran Not enough imbalance")
     }
   }
 
-  const tradeInAsset = async (imbalanceAmount) => {
-      console.log("tradeinasset")
-      const tx = await futreSwapInstance.internalExchange(imbalanceAmount, false, {
+  const tradeInStable = async (amountToPay) => {
+      const balanceOfStable = await getBalanceStable()
+      console.log("tradein stable")
+      const amount = balanceOfStable < amountToPay ? balanceOfStable : amountToPay
+      const tx = await futreSwapInstance.internalExchange(amount, false, {
           gasPrice: GAS_PRICE
       })
       logger.log("info", tx)
-
   }
 
-  const tradeInStable = async (imbalanceAmount) => {
-      console.log("trade instable")
-      const tx = await futreSwapInstance.internalExchange(imbalanceAmount, true, {
+  const tradeInAsset = async (amountToPay) => {
+      const balanceOfAsset = await getBalanceAsset()
+      console.log("trade in asset")
+      const amount = balanceOfAsset < amountToPay ? balanceOfAsset : amountToPay
+      const tx = await futreSwapInstance.internalExchange(amount, true, {
         gasPrice: GAS_PRICE
       })
       logger.log("info", tx)
@@ -66,6 +71,10 @@ const {
     const profitAmount = recieveAmount.sub(amountToPay)
     console.log({profitAmount: profitAmount.toString()})
     return {amountToPay, profitAmount}
+
+  }
+
+  const adjustForBalance = async () => {
 
   }
 
