@@ -74,10 +74,6 @@ const {
 
   }
 
-  const adjustForBalance = async () => {
-
-  }
-
   module.exports = {
       getImbalance
   }
