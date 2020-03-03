@@ -5,10 +5,9 @@ const {
     GAS_PRICE,
     MIN_PROFIT
   } = require("../configurations");
-//   const { DAI_ADDRESS, CHAINLINK_ADDRESS} = require("../constants")
-  const { FUTURESWAP_ABI } = require("../ABI")
-  const {logger} = require('../logging')
-  const {getBalanceAsset, getBalanceStable} = require('./tokenServices')
+const { FUTURESWAP_ABI } = require("../ABI")
+const {logger} = require('../logging')
+const {getBalanceAsset, getBalanceStable} = require('./tokenServices')
 
   const provider = new ethers.getDefaultProvider(NETWORK);
 
