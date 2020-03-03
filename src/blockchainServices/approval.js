@@ -2,7 +2,7 @@ const { ethers } = require("ethers");
 const {
     FUTURESWAP_ADDRESS,
     NETWORK,
-    GAS_PRICE,
+    GAS_PRICE_APPROVAL,
   } = require("../configurations");
 const { ERC20_ABI } = require("../ABI")
 const {ASSET_ADDRESS, STABLE_ADDRESS} = require("../constants")
@@ -23,13 +23,17 @@ const checkAndApprove = async () => {
     const assetAllowance = await assetInstance.allowance(wallet.address, FUTURESWAP_ADDRESS)
     if (Stableallowance.toString() === '0') {
         logger.log('info', "starting approve stable transaction")
-        const tx = await stableInstance.approve(FUTURESWAP_ADDRESS, ethers.utils.bigNumberify(ALOT_OF_TOKENS))
+        const tx = await stableInstance.approve(FUTURESWAP_ADDRESS, ethers.utils.bigNumberify(ALOT_OF_TOKENS), {
+            gasPrice: GAS_PRICE_APPROVAL
+        })
         await provider.waitForTransaction(tx.hash)
         logger.log('info', tx)
     }
     if (assetAllowance.toString() === '0') {
         logger.log('info', "starting approve asset transaction")
-        const tx = await assetInstance.approve(FUTURESWAP_ADDRESS, ethers.utils.bigNumberify(ALOT_OF_TOKENS))
+        const tx = await assetInstance.approve(FUTURESWAP_ADDRESS, ethers.utils.bigNumberify(ALOT_OF_TOKENS), {
+            gasPrice: GAS_PRICE_APPROVAL
+        })
         await provider.waitForTransaction(tx.hash)
         logger.log('info', tx)
     }

@@ -1,6 +1,7 @@
 require('dotenv').config()
 const {getImbalance} = require('./blockchainServices/internalExchange')
 const {checkAndApprove} = require('./blockchainServices/approval')
+const {RERUNTIME} = require('./configurations')
 
 const main = async () => {
     await checkAndApprove()
@@ -8,3 +9,4 @@ const main = async () => {
 }
 
 main()
+setInterval(main, RERUNTIME)

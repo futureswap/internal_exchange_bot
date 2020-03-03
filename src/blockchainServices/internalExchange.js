@@ -3,6 +3,7 @@ const {
     FUTURESWAP_ADDRESS,
     NETWORK,
     GAS_PRICE,
+    MIN_PROFIT
   } = require("../configurations");
 //   const { DAI_ADDRESS, CHAINLINK_ADDRESS} = require("../constants")
   const { FUTURESWAP_ABI } = require("../ABI")
@@ -21,25 +22,32 @@ const {
     // const constants = await futreSwapInstance.constants()
     // console.log({constants})
     const imbalanceMultiplier = ethers.utils.bigNumberify("101")
-    const toTrade = calculateImbalanceAmount(imbalanceAmount, isAssetImbalance, imbalanceMultiplier)
-
+    const {amountToPay, profitAmount} = await calculateImbalanceAmount(imbalanceAmount, isAssetImbalance, imbalanceMultiplier)
+    if (profitAmount >= MIN_PROFIT) {
     if (isAssetImbalance) {
-        await tradeInAsset(toTrade)
+        await tradeInAsset(amountToPay)
     } else {
-        await tradeInStable(toTrade)
+        await tradeInStable(amountToPay)
+    }
+    } else {
+        logger.log("info", "Check Ran Not enough imbalance")
     }
   }
 
   const tradeInAsset = async (imbalanceAmount) => {
       console.log("tradeinasset")
-      const tx = await futreSwapInstance.internalExchange(imbalanceAmount, false)
+      const tx = await futreSwapInstance.internalExchange(imbalanceAmount, false, {
+          gasPrice: GAS_PRICE
+      })
       logger.log("info", tx)
 
   }
 
   const tradeInStable = async (imbalanceAmount) => {
       console.log("trade instable")
-      const tx = await futreSwapInstance.internalExchange(imbalanceAmount, true)
+      const tx = await futreSwapInstance.internalExchange(imbalanceAmount, true, {
+        gasPrice: GAS_PRICE
+      })
       logger.log("info", tx)
 
   }
@@ -50,8 +58,14 @@ const {
     const traderRecieves = traderPays.add(traderProfit)
     const oneEther = ethers.utils.bigNumberify("1000000000000000000")
     const buyAssetRatio = traderRecieves.mul(oneEther).div(traderPays)
-    // const recievedAmount = await futreSwapInstance.getImbalance(true, buyAssetRatio)
-    return buyAssetRatio
+    console.log({buyAssetRatio: buyAssetRatio.toString()})
+    const amountToPay = imbalanceAmount.sub(imbalanceAmount.mul(buyAssetRatio).div(oneEther)).mul(15)
+    console.log({amountToPay: amountToPay.toString()})
+    const imbalanceSide = isAssetImbalance ? false : true
+    const recieveAmount = await futreSwapInstance.getImbalance(imbalanceSide, amountToPay)
+    const profitAmount = recieveAmount.sub(amountToPay)
+    console.log({profitAmount: profitAmount.toString()})
+    return {amountToPay, profitAmount}
 
   }
 
