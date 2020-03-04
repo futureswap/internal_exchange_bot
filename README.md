@@ -12,6 +12,7 @@
 PRIVATE_KEY=<your private key>
 
 ```
+* If the Private key is not there the bot will not run
 ## configurations
 * configurations are stored in the configuration.js file 
 ```
