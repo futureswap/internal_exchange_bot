@@ -20,9 +20,8 @@ const {getBalanceAsset, getBalanceStable} = require('./tokenServices')
     const [imbalanceAmount, isAssetImbalance] = await futreSwapInstance.calculateImbalance()
     console.log(imbalanceAmount.toString())
     console.log(isAssetImbalance)
-    // const constants = await futreSwapInstance.constants()
-    // console.log({constants})
-    const imbalanceMultiplier = ethers.utils.bigNumberify("101")
+    const constants = await futreSwapInstance.constants()
+    const imbalanceMultiplier = constants.imbalanceMultiplier
     const {amountToPay, profitAmount} = await calculateImbalanceAmount(imbalanceAmount, isAssetImbalance, imbalanceMultiplier)
     if (profitAmount >= MIN_PROFIT) {
     if (isAssetImbalance) {
@@ -60,7 +59,7 @@ const {getBalanceAsset, getBalanceStable} = require('./tokenServices')
     const traderRecieves = traderPays.add(traderProfit)
     const oneEther = ethers.utils.bigNumberify("1000000000000000000")
     const buyAssetRatio = traderRecieves.mul(oneEther).div(traderPays)
-    const amountToPay = imbalanceAmount.sub(imbalanceAmount.mul(buyAssetRatio).div(oneEther)).mul(15)
+    const amountToPay = imbalanceAmount.mul(buyAssetRatio).sub(imbalanceAmount).div(oneEther).div(3)
     const imbalanceSide = isAssetImbalance ? false : true
     const recieveAmount = await futreSwapInstance.getImbalance(imbalanceSide, amountToPay)
     const profitAmount = recieveAmount.sub(amountToPay)
