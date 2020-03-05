@@ -43,3 +43,8 @@ const MIN_PROFIT = 1000000000000000000
 $ npm install 
 $ npm run start
 ```
+* logs get written to log.txt and errors to errors.txt 
+* to have a continuous view run 
+```
+$ tail -f log.txt
+``` 

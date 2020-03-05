@@ -124,3 +124,6 @@ public/
 .dynamodb/
 
 # End of https://www.gitignore.io/api/node,macos
+
+log.txt
+errors.txt
