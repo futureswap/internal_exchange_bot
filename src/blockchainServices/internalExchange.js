@@ -23,7 +23,6 @@ const {getBalanceAsset, getBalanceStable} = require('./tokenServices')
     const stablePrice = await futreSwapInstance.getStableTokenPrice()
     const assetPrice = await futreSwapInstance.getAssetTokenPrice()
     const profitAmount = await calculateImbalanceAmount(amountToPay, poolNeedsAsset, imbalanceMultiplier, stablePrice, assetPrice)
-    console.log({profitAmount})
     if (profitAmount >= MIN_PROFIT) {
     if (poolNeedsAsset) {
       await tradeInAsset(amountToPay)
