@@ -15,7 +15,7 @@ let stableInstance, assetInstance
 const getTokenAddresses = async () => {
     const futureswap = new ethers.Contract(FUTURESWAP_ADDRESS, FUTURESWAP_ABI, provider)
     const instances = await futureswap.instances()
-    const assetAddress = instances.token
+    const assetAddress = instances.assetToken
     const stableAddress = instances.stableToken
     const stableContract = new ethers.Contract(stableAddress, ERC20_ABI, provider);
     const assetContract = new ethers.Contract(assetAddress, ERC20_ABI, provider);

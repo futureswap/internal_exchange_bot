@@ -17,17 +17,18 @@ const {getBalanceAsset, getBalanceStable} = require('./tokenServices')
 
 
   const getImbalance = async () => {
-    const [imbalanceAmount, isAssetImbalance] = await futreSwapInstance.calculateImbalance()
-    console.log(imbalanceAmount.toString())
-    console.log(isAssetImbalance)
+    const [amountToPay, poolNeedsAsset] = await futreSwapInstance.calculateImbalance()
     const constants = await futreSwapInstance.constants()
     const imbalanceMultiplier = constants.imbalanceMultiplier
-    const {amountToPay, profitAmount} = await calculateImbalanceAmount(imbalanceAmount, isAssetImbalance, imbalanceMultiplier)
+    const stablePrice = await futreSwapInstance.getStableTokenPrice()
+    const assetPrice = await futreSwapInstance.getAssetTokenPrice()
+    const profitAmount = await calculateImbalanceAmount(amountToPay, poolNeedsAsset, imbalanceMultiplier, stablePrice, assetPrice)
+    console.log({profitAmount})
     if (profitAmount >= MIN_PROFIT) {
-    if (isAssetImbalance) {
-        await tradeInStable(amountToPay)
+    if (poolNeedsAsset) {
+      await tradeInAsset(amountToPay)
     } else {
-        await tradeInAsset(amountToPay)
+      await tradeInStable(amountToPay)
     }
     } else {
         logger.log("info", "Check Ran Not enough imbalance")
@@ -53,17 +54,20 @@ const {getBalanceAsset, getBalanceStable} = require('./tokenServices')
 
   }
 
-  const calculateImbalanceAmount = async (imbalanceAmount, isAssetImbalance, imbalanceMultiplier) => {
-    const traderPays = imbalanceAmount.mul(imbalanceMultiplier).div(100).div(2)
-    const traderProfit = imbalanceAmount.sub(traderPays.mul(2))
-    const traderRecieves = traderPays.add(traderProfit)
-    const oneEther = ethers.utils.bigNumberify("1000000000000000000")
-    const buyAssetRatio = traderRecieves.mul(oneEther).div(traderPays)
-    const amountToPay = imbalanceAmount.mul(buyAssetRatio).sub(imbalanceAmount).div(oneEther).div(3)
-    const imbalanceSide = isAssetImbalance ? false : true
-    const recieveAmount = await futreSwapInstance.getImbalance(imbalanceSide, amountToPay)
-    const profitAmount = recieveAmount.sub(amountToPay)
-    return {amountToPay, profitAmount}
+  const calculateImbalanceAmount = async (amountToPay, poolNeedsAsset, imbalanceMultiplier, stablePrice, assetPrice) => {
+    let valueReturned
+    let valueToPay 
+    if (poolNeedsAsset) {
+     valueReturned =
+      (amountToPay * assetPrice * (imbalanceMultiplier / 1000) / 1e18);
+      valueToPay = amountToPay * assetPrice / 1e18
+    } else {
+      valueReturned =
+        (amountToPay * stablePrice * (imbalanceMultiplier / 1000) / 1e18);
+          valueToPay = amountToPay * stablePrice / 1e18
+    }
+    const profitAmount = valueReturned - valueToPay
+    return profitAmount
 
   }
 
